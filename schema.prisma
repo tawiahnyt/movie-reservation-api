@@ -1,0 +1,84 @@
+generator client {
+    provider  = "prisma-client-py"
+    interface = "asyncio"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id          String @id @default(uuid())
+    fullName    String
+    email       String @unique
+    phoneNumber String
+    password    String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    reservations Reservation[]
+}
+
+model Admin {
+    id          String @id @default(uuid())
+    fullName    String
+    email       String @unique
+    phoneNumber String
+    password    String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Movie {
+    id          String @id @default(uuid())
+    title       String
+    description String @db.Text
+    imageURL    String
+    genre       Json[]
+    duration    Int // minutes
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    showtimes Showtime[]
+}
+
+model Showtime {
+    id        String   @id @default(uuid())
+    startTime DateTime
+    price     Float
+    capacity  Int
+
+    movieId String
+    movie   Movie  @relation(fields: [movieId], references: [id])
+
+    reservations Reservation[]
+
+    createdAt DateTime @default(now())
+}
+
+model Reservation {
+    id String @id @default(uuid())
+
+    quantity    Int
+    totalAmount Float
+    status      ReservationStatus @default(PENDING)
+
+    userId String
+    user   User   @relation(fields: [userId], references: [id])
+
+    showtimeId String
+    showtime   Showtime @relation(fields: [showtimeId], references: [id])
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum ReservationStatus {
+    PENDING
+    CONFIRMED
+    CANCELLED
+}
