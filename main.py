@@ -68,30 +68,3 @@ async def login(data: LoginModel):
 
 
 
-@app.post("/post-blog")
-async def createBlogPost(data: CreateBlogModel, user: Any = Depends(get_current_user)):
-    print(user)
-    blog = await prisma.blog.create(
-        data={
-            "title": data.title,
-            "category": data.category,
-            "content": data.content,
-            "tags": data.tags,
-            "userId": user["userId"]
-        }
-    )
-    return {
-        "message": "Blog post created successfully",
-        "data": blog
-            }
-
-
-@app.get("/blogs")
-async def getBlogPost(user: Any = Depends(get_current_user)):
-    blogs = await prisma.blog.find_many(
-        where=({"userId": user["userId"]})
-    )
-    return {
-        "message": "Blog post fetched successfully",
-        "data": blogs
-            }
